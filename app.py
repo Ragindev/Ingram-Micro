@@ -1,18 +1,14 @@
-import http.client
+# Get Order from BigCommerce
+import requests
 
-conn = http.client.HTTPSConnection("api.bigcommerce.com")
-
-headers = {
-    'Content-Type': "application/json",
-    'Accept': "application/json",
-    'X-Auth-Token': "redptv84kmlgfed97l7jroa0mdknfgc"
-    }
-
-conn.request("GET", "/stores/b5ajmj9rbq/v3/catalog/products/112", headers=headers)
-
-res = conn.getresponse()
-data = res.read()
-
-print(data.decode("utf-8"))
+url = "https://api.bigcommerce.com/stores/b5ajmj9rbq/v2/orders/111"
 
 
+header = {
+    "X-Auth-Token":"redptv84kmlgfed97l7jroa0mdknfgc",
+    "Content-Type":"application/json",
+    "Accept": "application/json"
+}
+
+response = requests.request("GET",url,headers=header)
+print(response.text)
