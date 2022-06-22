@@ -1,7 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container">
-    <h1>Muhammed Ramees </h1>
+    <h1>Order Data</h1>
+    <!-- <p>{{response}}</p> -->
+    <p>Cutomer id is : {{response['customer_id']}}</p>
+    <p>Order id is : {{response['id']}}</p>
+    <p>Shipping cost is : {{response['base_shipping_cost']}}</p>
+    <p>ShopifyOrderId is : {{response['ShopifyOrderId']}}</p>
+
+
+    <p>product update</p>
     <p>{{response.text}}</p>
+    <p>================</p>
 </div>
 {% endblock %}
