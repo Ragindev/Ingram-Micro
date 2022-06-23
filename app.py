@@ -1,6 +1,8 @@
+import http
 import json
-from urllib import response
-from flask import Flask, render_template 
+from pickle import GET
+from urllib3 import request
+from flask import Flask, render_template,request
 import requests
 
 
@@ -21,17 +23,13 @@ def index():
 
 @app.route('/product', methods=["GET", "POST"])
 def product():
-    url = "https://api.bigcommerce.com/stores/b5ajmj9rbq/v3/hooks"
+    if request.method =='POST':
+        print('Product Updated',request.json)  #Get all data 
+        return 'New Changes'
 
-    headers = {
-        "Content-Type": "",
-        "Accept": "",
-        "X-Auth-Token": "redptv84kmlgfed97l7jroa0mdknfgc"
-    }
-
-    response = requests.request("GET", url, headers=headers)
-    print(response.text)
-    return render_template('/index.html', response=response)
-
+    elif request.method =='GET':    
+        print('New Request')
+        return 'New Request'
+    return render_template('/product.html')
 if __name__ == ('__main__'):
     app.run(debug=True)
