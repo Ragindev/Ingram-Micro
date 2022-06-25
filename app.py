@@ -28,22 +28,28 @@ def product():
 
     elif request.method =='GET':    
         print('New Request')
-        # newRequest = 'New REQUEST'
-        # return newRequest
-    print("****** product data *********")
-    print(productdata)
-    print("****** product ID IS  *********")
-    print(productdata['data']['id'])
-    print("****** product ID IS  *********")
+        newRequest = 'New REQUEST'
+        return newRequest
+        
     product_id = productdata['data']['id']
-    print("****** product ID new var is  *********")
-    print (product_id)
-    url = f"https://api.bigcommerce.com/stores/b5ajmj9rbq/v3/catalog/products/{product_id}"
+    store_id = productdata['store_id']
+    store_hash = productdata['producer']
+    
+    print("****** Product DATA  *********")
+    print(productdata)
+
+    print("****** Product ID IS  *********")
+    print(product_id)
+    
+    print("****** STORE ID IS  *********")
+    print(store_id)
+    
+    url = f"https://api.bigcommerce.com/{store_hash}/v3/catalog/products/{product_id}"
     
     response = requests.request("GET",url,headers=header).json()
-    # print("Customer ID is : ",response['customer_id'])
-    print("RESPONSE is : ",response)
+    print("***********  Product Name *********** ")
+    print(response['data']['name'])
     return render_template('/index.html', header=header, response=response,productdata=productdata)
 
 if __name__ == ('__main__'):
-    app.run(debug=True)
+    app.run(debug=True) 
