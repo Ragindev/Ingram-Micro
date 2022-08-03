@@ -21,18 +21,18 @@ def listern():
     backgroundThread.start()
     return 'Yeah, I got it',200
 
-@app.route('/try-your-self',methods=["GET"])
-def tryYourSelf():
-    orderdata = {
-        'producer':'stores/b5ajmj9rbq',
-        'scope':'store/cart/converted',
-        'store_id':'1001802518',
-        'data':{
-            'orderId':'288'
-        }
-    }
-    processWebhookPayload(orderdata)
-    return 'Yeah, I got it'
+# @app.route('/try-your-self',methods=["GET"])
+# def tryYourSelf():
+#     orderdata = {
+#         'producer':'stores/b5ajmj9rbq',
+#         'scope':'store/cart/converted',
+#         'store_id':'1001802518',
+#         'data':{
+#             'orderId':'317'
+#         }
+#     }
+#     processWebhookPayload(orderdata)
+#     return 'Yeah, I got it'
 
 def processWebhookPayload(order_data):
     header = {
@@ -106,6 +106,17 @@ def processWebhookPayload(order_data):
 
 @app.route('/createOrder')
 def createOrder(shipping_address):
+    # create token
+    url = "https://api.ingrammicro.com:443/oauth/oauth30/token"
+    payload='grant_type=client_credentials&client_id=vxGA45MVwXFEWYvjzITSGTdGAgeygbct&client_secret=FyW7sATOWbGKFrOW'
+    headers = {
+    'Content-Type': 'application/x-www-form-urlencoded'
+    }
+    response = requests.request("POST", url, headers=headers, data=payload)
+    print(response.text)
+    print("*********** token created **********")
+    
+    
     #Header Used to access ingrammicro
     headers = {
     'accept': 'application/json',
@@ -114,7 +125,7 @@ def createOrder(shipping_address):
     'IM-SenderID': 'IngramMicro',
     'IM-CorrelationID': '2022-07-29T05:31:04+0000',
     'Content-Type': 'application/json',
-    'Authorization': 'Bearer NbtKEEUbgPGYTrF7p4HkSXEkHGow'
+    'Authorization': 'Bearer tRDEIaefR4BLsAGKbHqZJLxbAz71' 
     }
     #API to create a order in ingrammicro 
     url = "https://api.ingrammicro.com:443/sandbox/resellers/v6/orders"
