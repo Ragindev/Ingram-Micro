@@ -94,7 +94,7 @@ def processWebhookPayload(order_data):
     print("****** GET THE SHIPPING DETAILS USING THE API  ******* \n")
     
     pp.pprint(shipping_address)
-    createOrder(product_data, shipping_address, products_In_Order) # Calling the Create Order Function 
+    createOrder(shipping_address, products_In_Order) # Calling the Create Order Function 
     print('\n')
     print('\n')
     return "got it" , 200
@@ -104,7 +104,7 @@ def processWebhookPayload(order_data):
 ########################################################
 
 @app.route('/createOrder')
-def createOrder( product_data, shipping_address, products_In_Order):
+def createOrder(shipping_address, products_In_Order):
     # Create token for every new order 
     client_id = 'vxGA45MVwXFEWYvjzITSGTdGAgeygbct'
     client_secret = 'FyW7sATOWbGKFrOW'
@@ -128,6 +128,10 @@ def createOrder( product_data, shipping_address, products_In_Order):
     'Content-Type': 'application/json',
     'Authorization': 'Bearer '+ accessToken['access_token']  # Passing token to the header 
     }
+    
+    print("PRODUCT 1  :",products_In_Order[0]['data']['sku'])
+    print("PRODUCT 2  :",products_In_Order[1]['data']['sku'])
+    
     # API to create a order in ingrammicro 
     url = "https://api.ingrammicro.com:443/sandbox/resellers/v6/orders"
     payload = json.dumps({
