@@ -24,11 +24,12 @@ def listern():
 @app.route('/try-your-self',methods=["GET"])
 def tryYourSelf():
     orderdata = {
-        'producer':'stores/b5ajmj9rbq',
+        'producer':'stores/o257sk57z9',
         'scope':'store/cart/converted',
-        'store_id':'1001802518',
+        'store_id':'1002102576', #store id NB
+        # 'store_id':'1001802518', #Store ID Camera Stuff
         'data':{
-            'orderId':'275'
+            'orderId':'683'
         }
     }
     processWebhookPayload(orderdata)
@@ -36,13 +37,14 @@ def tryYourSelf():
 
 def processWebhookPayload(order_data):
     header = {
-        "X-Auth-Token":"redptv84kmlgfed97l7jroa0mdknfgc",
+        "X-Auth-Token":"r4vkpwhvq8h595ak1m9vtg4l6pee9dy",
         "Content-Type":"application/json",
         "Accept": "application/json"
         # STORE HASH : b5ajmj9rbq
+        # STORE HASH : o257sk57z9
     }
     
-    # print(order_data)
+    print(order_data)
 ########################################################
 ########################################################
 
@@ -81,13 +83,12 @@ def processWebhookPayload(order_data):
         product_data = requests.request("GET",url,headers=header).json()
         # print('12. Product data is   : ',product_data)
         products_In_Order.append(product_data)
-        # pp.pprint(product_data)
+        print(product_data)
         lines_data = {
             "customerLineNumber":customerLineNumber+1,
             "vendorPartNumber" : product_data["data"]["sku"],
             "quantity": 1,
             "unitPrice": product_data["data"]["price"],
-            "notes" : "test order for IM"
         }
         print("Lines Data in loop : ",lines_data)
         linesOut.append(lines_data)
@@ -111,7 +112,7 @@ def processWebhookPayload(order_data):
     
     print("****** GET THE SHIPPING DETAILS USING THE API  ******* \n")
     
-    # pp.pprint(shipping_address)
+    pp.pprint(shipping_address)
     createOrder(shipping_address, products_In_Order , linesOut) # Calling the Create Order Function 
     print('\n')
     print('\n')
