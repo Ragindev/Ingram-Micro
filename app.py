@@ -66,6 +66,8 @@ def processWebhookPayload(order_data):
     
     products_In_Order = [] #Create an empty array to store the values from the below loop
     # Using List Order Products API find the products in the present order 
+    linesOut = []
+    customerLineNumber = 0
     url = f"https://api.bigcommerce.com/{store_hash}/v2/orders/{order_id}/products"
     response = requests.request("GET",url,headers=header).json()
     # print("9. Product DATA :", response)
@@ -79,11 +81,27 @@ def processWebhookPayload(order_data):
         product_data = requests.request("GET",url,headers=header).json()
         # print('12. Product data is   : ',product_data)
         products_In_Order.append(product_data)
-        pp.pprint(product_data)
+        # pp.pprint(product_data)
+        lines_data = {
+            "customerLineNumber":customerLineNumber+1,
+            "vendorPartNumber" : product_data["data"]["sku"],
+            "quantity": 1,
+            "unitPrice": product_data["data"]["price"],
+            "notes" : "test order for IM"
+        }
+        print("Lines Data in loop : ",lines_data)
+        linesOut.append(lines_data)
         
         
         print('\n')
         print('\n')
+        customerLineNumber = customerLineNumber + 1
+        
+    # linesOut = [lines_data]
+    print(linesOut)
+    
+    print('\n')
+    print('\n')
 ########################################################
 ########################################################
         
@@ -93,8 +111,8 @@ def processWebhookPayload(order_data):
     
     print("****** GET THE SHIPPING DETAILS USING THE API  ******* \n")
     
-    pp.pprint(shipping_address)
-    createOrder(shipping_address, products_In_Order) # Calling the Create Order Function 
+    # pp.pprint(shipping_address)
+    createOrder(shipping_address, products_In_Order , linesOut) # Calling the Create Order Function 
     print('\n')
     print('\n')
     return "got it" , 200
@@ -104,7 +122,7 @@ def processWebhookPayload(order_data):
 ########################################################
 
 @app.route('/createOrder')
-def createOrder(shipping_address, products_In_Order):
+def createOrder(shipping_address, products_In_Order, linesOut):
     # Create token for every new order 
     client_id = 'vxGA45MVwXFEWYvjzITSGTdGAgeygbct'
     client_secret = 'FyW7sATOWbGKFrOW'
@@ -129,8 +147,8 @@ def createOrder(shipping_address, products_In_Order):
     'Authorization': 'Bearer '+ accessToken['access_token']  # Passing token to the header 
     }
     
-    print("PRODUCT 1  :",products_In_Order[0]['data']['sku'])
-    print("PRODUCT 2  :",products_In_Order[1]['data']['sku'])
+    # print("PRODUCT 1  :",products_In_Order[0]['data']['sku'])
+    # print("PRODUCT 2  :",products_In_Order[1]['data']['sku'])
     
     # API to create a order in ingrammicro 
     url = "https://api.ingrammicro.com:443/sandbox/resellers/v6/orders"
@@ -157,24 +175,13 @@ def createOrder(shipping_address, products_In_Order):
     },
     #each lines contain a single product 
     #get the product sku from the bigcommerce order and crate lines based on the number of product 
-    "lines": [
-        {
-        "customerLineNumber": "001",
-        "ingramPartNumber": "2985452",
-        "quantity": 1,
-        "unitPrice": 58.41
-        },
-        {
-        "customerLineNumber": "002",
-        "ingramPartNumber": "2985452",
-        "quantity": 1,
-        "unitPrice": 220.51
-        }
-    ]
+    "lines": linesOut
     })  
+    print("Payload Is : ",payload)
     response = requests.request("POST", url, headers=headers, data=payload)
     print("****** CREATE A ORDER USING THE ABOVE DATA  ******* \n")
     print(response.text)
+    # print("Product in order is **********: ",products_In_Order)
     return "Order Created"
 
 if __name__ == '__main__':
