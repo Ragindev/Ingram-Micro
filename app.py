@@ -29,7 +29,7 @@ def tryYourSelf():
         'store_id':'1002102576', #store id NB
         # 'store_id':'1001802518', #Store ID Camera Stuff
         'data':{
-            'orderId':'684'
+            'orderId':'687'
             # 'orderId':'500'
         }
     }
@@ -82,34 +82,58 @@ def processWebhookPayload(order_data):
         # Getting Each product data using product API
         url = f"https://api.bigcommerce.com/{store_hash}/v3/catalog/products/{product_id}"
         product_data = requests.request("GET",url,headers=header).json()
-        # print('12. Product data is   : ',product_data)
-                
+        
+        # Asign the SKU to the bcSKU Variable     
         bcSKU= product_data["data"]["sku"]
-        print("bcSKU is ::::::: ",bcSKU)
-        BC_prd = {"NBDVR622GW":"camera","NBDVR522GW":"camera","NBDVR422GW":"camera","NBDVRS2HK": "accessories","NBDVRS2PM":"accessories"}
+        print("The Selected product BC SKU Is : ",bcSKU)
+        # Assign the selected BigCommerce SKUs to a variable 
+        BC_prd = {"NBDVR622GW":"camera",
+                  "NBDVR522GW":"camera",
+                  "NBDVR422GW":"camera",
+                  "NBDVR322GW":"camera",
+                  "NBDVR122":"camera",
+                  "NBDVR222":"camera",
+                  "NBDVR622GW-1-1":"camera",
+                  "NBDVRS2RFCZ":"accessories",
+                  "NBDVRS2RFCW":"accessories",
+                  "NBDVRS2RWC":"accessories",
+                  "NBDVRS2HK": "accessories",
+                  "NBDVRS2PM":"accessories",
+                  "NBDVRS2GP32U3":"accessories",
+                  "NBDVRS2SD64GBU3":"accessories",
+                  "NBDVRS2PMGPS":"accessories",
+                  "NBDVRS2PF":"accessories",
+                  "NBDVRS2SD32GBU3":"accessories",
+                  "NBDVRS2SD128GBU3":"accessories",
+                  "NBDVRS2CLC":"accessories",
+                  "NBDVRS2CC":"accessories",
+                  "NBDVR380BAT":"accessories",
+                  "NBDVRS2SD256GBU3":"accessories",
+                  "NBSFITFRONTREARG":"accessories",
+                  "NBDVR380GWXRCB":"accessories",
+                  }
 
-        # IM_camera = 2985452
-        # IM_accessories = 3278984
-        IM_SKU =""
-        for SKU_key in BC_prd:
-            print(SKU_key)
+        IM_SKU =""  # Create an empty variable to store the IM SKU
+        # Checking each SKUs available in the BC 
+        for SKU_key in BC_prd: 
             if bcSKU == SKU_key:
-                print('SKU Matching',SKU_key)
-                print("KEY VALUES",BC_prd[SKU_key])
+                # Check the SKU values camera or Accessories
+                # if the product is a camera then it will assign a new sku values matching in IM
+                # else Assign the product to the second IM Sku
                 if BC_prd[SKU_key] == 'camera':
-                    print("This is Camera  :",2985452)
+                    print("The selected product is ::: CAMERA ")
                     IM_SKU = 2985452
                 else:
-                    print("This is Accessories  :",3278984)
+                    print("The selected product is ::: CAMERA ACCESSORIES ")
                     IM_SKU = 3278984
                     
         products_In_Order.append(product_data)
         # print(product_data)
         lines_data = {
             "customerLineNumber":customerLineNumber+1,
-            "ingramPartNumber" : IM_SKU,
+            "ingramPartNumber" : IM_SKU, #collecting the sku from the top
             "quantity": 1,
-            "unitPrice": product_data["data"]["price"],
+            "unitPrice": product_data["data"]["price"], 
         }
         print("Lines Data in loop : ",lines_data)
         linesOut.append(lines_data)
@@ -119,7 +143,6 @@ def processWebhookPayload(order_data):
         print('\n')
         customerLineNumber = customerLineNumber + 1
         
-    # linesOut = [lines_data]
     print(linesOut)
     
     print('\n')
@@ -178,9 +201,6 @@ def createOrder(shipping_address, products_In_Order, linesOut):
     'Authorization': 'Bearer '+ accessToken['access_token']  # Passing token to the header 
     }
     
-    # print("PRODUCT 1  :",products_In_Order[0]['data']['sku'])
-    # print("PRODUCT 2  :",products_In_Order[1]['data']['sku'])
-    
     # API to create a order in ingrammicro 
     url = "https://api.ingrammicro.com:443/sandbox/resellers/v6/orders"
     payload = json.dumps({
@@ -212,7 +232,6 @@ def createOrder(shipping_address, products_In_Order, linesOut):
     response = requests.request("POST", url, headers=headers, data=payload)
     print("****** CREATE A ORDER USING THE ABOVE DATA  ******* \n")
     print(response.text)
-    # print("Product in order is **********: ",products_In_Order)
     return "Order Created"
 
 if __name__ == '__main__':
