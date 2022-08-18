@@ -29,7 +29,7 @@ def tryYourSelf():
         'store_id':'1002102576', #store id NB
         # 'store_id':'1001802518', #Store ID Camera Stuff
         'data':{
-            'orderId':'683'
+            'orderId':'684'
             # 'orderId':'500'
         }
     }
@@ -83,11 +83,31 @@ def processWebhookPayload(order_data):
         url = f"https://api.bigcommerce.com/{store_hash}/v3/catalog/products/{product_id}"
         product_data = requests.request("GET",url,headers=header).json()
         # print('12. Product data is   : ',product_data)
+                
+        bcSKU= product_data["data"]["sku"]
+        print("bcSKU is ::::::: ",bcSKU)
+        BC_prd = {"NBDVR622GW":"camera","NBDVR522GW":"camera","NBDVR422GW":"camera","NBDVRS2HK": "accessories","NBDVRS2PM":"accessories"}
+
+        # IM_camera = 2985452
+        # IM_accessories = 3278984
+        IM_SKU =""
+        for SKU_key in BC_prd:
+            print(SKU_key)
+            if bcSKU == SKU_key:
+                print('SKU Matching',SKU_key)
+                print("KEY VALUES",BC_prd[SKU_key])
+                if BC_prd[SKU_key] == 'camera':
+                    print("This is Camera  :",2985452)
+                    IM_SKU = 2985452
+                else:
+                    print("This is Accessories  :",3278984)
+                    IM_SKU = 3278984
+                    
         products_In_Order.append(product_data)
-        print(product_data)
+        # print(product_data)
         lines_data = {
             "customerLineNumber":customerLineNumber+1,
-            "vendorPartNumber" : product_data["data"]["sku"],
+            "ingramPartNumber" : IM_SKU,
             "quantity": 1,
             "unitPrice": product_data["data"]["price"],
         }
@@ -113,7 +133,9 @@ def processWebhookPayload(order_data):
     
     print("****** GET THE SHIPPING DETAILS USING THE API  ******* \n")
     
-    pp.pprint(shipping_address)
+    print(shipping_address)
+    
+########################################################################################
     # Check the Country || if the selected country is Austalia then do the next step 
     # else simply print  Selected Country is not Australia
     selected_country = shipping_address[0]['country']
@@ -186,7 +208,7 @@ def createOrder(shipping_address, products_In_Order, linesOut):
     #get the product sku from the bigcommerce order and crate lines based on the number of product 
     "lines": linesOut
     })  
-    print("Payload Is : ",payload)
+    # print("Payload Is : ",payload)
     response = requests.request("POST", url, headers=headers, data=payload)
     print("****** CREATE A ORDER USING THE ABOVE DATA  ******* \n")
     print(response.text)
