@@ -30,6 +30,7 @@ def tryYourSelf():
         # 'store_id':'1001802518', #Store ID Camera Stuff
         'data':{
             'orderId':'683'
+            # 'orderId':'500'
         }
     }
     processWebhookPayload(orderdata)
@@ -113,10 +114,17 @@ def processWebhookPayload(order_data):
     print("****** GET THE SHIPPING DETAILS USING THE API  ******* \n")
     
     pp.pprint(shipping_address)
-    createOrder(shipping_address, products_In_Order , linesOut) # Calling the Create Order Function 
-    print('\n')
-    print('\n')
-    return "got it" , 200
+    # Check the Country || if the selected country is Austalia then do the next step 
+    # else simply print  Selected Country is not Australia
+    selected_country = shipping_address[0]['country']
+    if selected_country != 'Australia':
+        print("Selected Country is not Australia")
+    else:
+        print("The Selected Country is : ",selected_country)
+        createOrder(shipping_address, products_In_Order , linesOut) # Calling the Create Order Function 
+        print('\n')
+        print('\n')
+        return "got it" , 200
 
 
 ########################################################
