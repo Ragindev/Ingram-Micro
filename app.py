@@ -29,7 +29,7 @@ def tryYourSelf():
         'store_id':'1002102576', #store id NB
         # 'store_id':'1001802518', #Store ID Camera Stuff
         'data':{
-            'orderId':'687'
+            'orderId':'684'
             # 'orderId':'500'
         }
     }
@@ -218,8 +218,8 @@ def createOrder(shipping_address, products_In_Order, linesOut):
         "addressLine1": shipping_address[0]['street_1'],
         "addressLine2": shipping_address[0]['street_2'],
         "city":  shipping_address[0]['city'],   
-        "state": "SA",  #Should be the state of AU
-        "postalCode": "4209", #4 Digit Postal Code available in AU   
+        # "state": "SA",  #Should be the state of AU
+        # "postalCode": "4209", #4 Digit Postal Code available in AU  
         "countryCode": shipping_address[0]['country_iso2'], #must be AU  
         "phoneNumber":  shipping_address[0]['phone'], 
         "email":  shipping_address[0]['email']
