@@ -29,7 +29,7 @@ def tryYourSelf():
         'store_id':'1002102576', #store id NB
         # 'store_id':'1001802518', #Store ID Camera Stuff
         'data':{
-            'orderId':'684'
+            'orderId':'694'
             # 'orderId':'500'
         }
     }
@@ -73,7 +73,7 @@ def processWebhookPayload(order_data):
     customerLineNumber = 0
     url = f"https://api.bigcommerce.com/{store_hash}/v2/orders/{order_id}/products"
     response = requests.request("GET",url,headers=header).json()
-    # print("9. Product DATA :", response)
+    print("Product DATA :", response)
     # collecting multipl product from the product API using for Loop
     for i in response:
         print("****** GET THE PRODUCTS DETAILS USING THE API  ******* \n")
@@ -132,7 +132,7 @@ def processWebhookPayload(order_data):
         lines_data = {
             "customerLineNumber":customerLineNumber+1,
             "ingramPartNumber" : IM_SKU, #collecting the sku from the top
-            "quantity": 1,
+            "quantity": response[0]['quantity'],
             "unitPrice": product_data["data"]["price"], 
         }
         print("Lines Data in loop : ",lines_data)
