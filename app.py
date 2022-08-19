@@ -1,7 +1,9 @@
+from email import header
 import http
 import json
 from math import prod
 from pickle import GET
+from wsgiref import headers
 from flask import Flask, render_template,request
 import requests
 import time
@@ -29,7 +31,7 @@ def tryYourSelf():
         'store_id':'1002102576', #store id NB
         # 'store_id':'1001802518', #Store ID Camera Stuff
         'data':{
-            'orderId':'694'
+            'orderId':'695'
             # 'orderId':'500'
         }
     }
@@ -46,8 +48,7 @@ def processWebhookPayload(order_data):
     }
     
     print(order_data)
-########################################################
-########################################################
+########################################################################################
 
     print("********** GET ORDER DATA FROM WEBHOOK *********** \n")
     store_hash = order_data['producer']
@@ -61,11 +62,18 @@ def processWebhookPayload(order_data):
     print("store_id                     :",store_id)
     print("order_id                     :",order_id )
     
+    print('\n')    
+########################################################################################
+# Chanaging the order status to Awaiting Shipment in Bigcommerce 
+    url = f"https://api.bigcommerce.com/{store_hash}/v2/orders/{order_id}"
+    payload = {
+        "status_id": 9, #Status id : 9 is Awaiting Shipment
+    }
+    update_order_status = requests.request("PUT", url, json=payload, headers=header).json()
     print('\n')
-    print('\n')
+    print("Order Status Changed to  : ", update_order_status['status'])
     
-########################################################
-########################################################
+########################################################################################
     
     products_In_Order = [] #Create an empty array to store the values from the below loop
     # Using List Order Products API find the products in the present order 
@@ -137,18 +145,13 @@ def processWebhookPayload(order_data):
         }
         print("Lines Data in loop : ",lines_data)
         linesOut.append(lines_data)
-        
-        
         print('\n')
         print('\n')
-        customerLineNumber = customerLineNumber + 1
-        
+        customerLineNumber = customerLineNumber + 1 
     print(linesOut)
-    
     print('\n')
     print('\n')
-########################################################
-########################################################
+########################################################################################
         
     #  Collecting shiping Address data from order shipping_address API  
     url = f"https://api.bigcommerce.com/{store_hash}/v2/orders/{order_id}/shipping_addresses"
@@ -172,8 +175,7 @@ def processWebhookPayload(order_data):
         return "got it" , 200
 
 
-########################################################
-########################################################
+########################################################################################
 
 @app.route('/createOrder')
 def createOrder(shipping_address, products_In_Order, linesOut):
