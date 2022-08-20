@@ -245,6 +245,15 @@ def getOrderStatus():
     # Create token for every new order 
     client_id = 'vxGA45MVwXFEWYvjzITSGTdGAgeygbct'
     client_secret = 'FyW7sATOWbGKFrOW'
+    store_hash="b5ajmj9rbq"
+    # STORE HASH : b5ajmj9rbq
+    # STORE HASH : o257sk57z9
+    bc_header = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            # 'X-Auth-Token': 'r4vkpwhvq8h595ak1m9vtg4l6pee9dy'
+            'X-Auth-Token': 'redptv84kmlgfed97l7jroa0mdknfgc'
+            }
     url = "https://api.ingrammicro.com:443/oauth/oauth30/token"
     payload=f'grant_type=client_credentials&client_id={client_id}&client_secret={client_secret}'
     headers = {
@@ -271,27 +280,124 @@ def getOrderStatus():
     pd_details=json.loads(response.text)
 
     for cs in pd_details['orders']:
-        
+        print("customer num",cs['customerOrderNumber'],"status",cs['orderStatus'])
         if cs['orderStatus'] == "CANCELED":
-            print("customer num",cs['customerOrderNumber'],"status",cs['orderStatus'])
-            url = f"https://api.bigcommerce.com/stores/b5ajmj9rbq/v2/orders/{cs['customerOrderNumber']}"
+           
+            url = f"https://api.bigcommerce.com/stores/{store_hash}/v2/orders/{cs['customerOrderNumber']}"
 
             payload = json.dumps({
             "status_id": 5
             })
-            headers = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            # 'X-Auth-Token': 'r4vkpwhvq8h595ak1m9vtg4l6pee9dy'
-            'X-Auth-Token': 'redptv84kmlgfed97l7jroa0mdknfgc  '
-            }
+            headers = bc_header
+
+            response = requests.request("PUT", url, headers=headers, data=payload)
+
+            # print(response.text)
+
+        elif cs['orderStatus'] == "PROCESSING":
+            url = f"https://api.bigcommerce.com/stores/{store_hash}/v2/orders/{cs['customerOrderNumber']}"
+
+            payload = json.dumps({
+            "status_id": 9
+            })
+            headers = bc_header
+
+            response = requests.request("PUT", url, headers=headers, data=payload)
+
+            # print(response.text)
+        
+        elif cs['orderStatus'] == "SHIPPED":
+            url = f"https://api.bigcommerce.com/stores/{store_hash}/v2/orders/{cs['customerOrderNumber']}"
+
+            payload = json.dumps({
+            "status_id": 2
+            })
+            headers = bc_header
+            response = requests.request("PUT", url, headers=headers, data=payload)
+
+            # print(response.text)
+
+        elif cs['orderStatus'] == "CLOSED":
+            url = f"https://api.bigcommerce.com/stores/{store_hash}/v2/orders/{cs['customerOrderNumber']}"
+
+            payload = json.dumps({
+            "status_id": 10
+            })
+            headers =bc_header
+
+            response = requests.request("PUT", url, headers=headers, data=payload)
+
+            # print(response.text)
+        
+        elif cs['orderStatus'] == "OPEN":
+            url = f"https://api.bigcommerce.com/stores/{store_hash}/v2/orders/{cs['customerOrderNumber']}"
+
+            payload = json.dumps({
+            "status_id": 8
+            })
+            headers =bc_header
 
             response = requests.request("PUT", url, headers=headers, data=payload)
 
             print(response.text)
+        
+        else:
+            print("UNKONOW STATUS",cs['orderStatus'])
 
     return "pd_details['orders']"
     
+# get order status from ingrammicro
+@app.route('/productUpdation',methods=["GET","POST","PUT"])
+def bcProductUpdate():
+    print("Get Order Status")
+    # Create token for every new order 
+    client_id = 'vxGA45MVwXFEWYvjzITSGTdGAgeygbct'
+    client_secret = 'FyW7sATOWbGKFrOW'
+    store_hash="b5ajmj9rbq"
+    # STORE HASH : b5ajmj9rbq
+    # STORE HASH : o257sk57z9
+    bc_header = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            # 'X-Auth-Token': 'r4vkpwhvq8h595ak1m9vtg4l6pee9dy'
+            'X-Auth-Token': 'redptv84kmlgfed97l7jroa0mdknfgc'
+            }
+    url = "https://api.ingrammicro.com:443/oauth/oauth30/token"
+    payload=f'grant_type=client_credentials&client_id={client_id}&client_secret={client_secret}'
+    headers = {
+    'Content-Type': 'application/x-www-form-urlencoded'
+    }
+    tokenResponse = requests.request("POST", url, headers=headers, data=payload)
+    # print(json.loads(tokenResponse.text))
+    # convert the tokenResponse from string to Dictionary using (json.loads)
+    accessToken =json.loads(tokenResponse.text)
+    print(accessToken['access_token'])
+
+    url = "https://api.ingrammicro.com:443/sandbox/resellers/v6/catalog/priceandavailability?includeAvailability=true&includePricing=true"
+    payload = json.dumps({
+    "products": [
+        {
+        "ingramPartNumber": "3278984"
+        },
+        {
+        "ingramPartNumber": "2985452"
+        }
+    ]
+    })
+    headers = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'Authorization': 'Bearer '+accessToken['access_token'],
+    'IM-CustomerNumber': '280695',
+    'IM-CorrelationID': '2022-07-29T05:31:04+0000',
+    'IM-SenderID': 'SampleUser-Best-Buys',
+    'IM-CountryCode': 'AU'
+    }
+    response = requests.request("POST", url, headers=headers, data=payload)
+    print(response.text)
+    return response.text
+
+
 
 if __name__ == '__main__':
     app.run()
