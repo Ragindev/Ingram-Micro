@@ -32,7 +32,7 @@ def tryYourSelf():
         'store_id':'1002102576', #store id NB
         # 'store_id':'1001802518', #Store ID Camera Stuff
         'data':{
-            'orderId':'695'
+            'orderId':'697'
             # 'orderId':'500'
         }
     }
@@ -170,7 +170,7 @@ def processWebhookPayload(order_data):
         print("Selected Country is not Australia")
     else:
         print("The Selected Country is : ",selected_country)
-        createOrder(shipping_address, products_In_Order , linesOut) # Calling the Create Order Function 
+        createOrder(shipping_address, products_In_Order, linesOut) # Calling the Create Order Function 
         print('\n')
         print('\n')
         return "got it" , 200
@@ -208,7 +208,7 @@ def createOrder(shipping_address, products_In_Order, linesOut):
     url = "https://api.ingrammicro.com:443/sandbox/resellers/v6/orders"
     payload = json.dumps({
     "customerOrderNumber": shipping_address[0]['order_id'],
-    "endCustomerOrderNumber": "ENDUSERPO1",
+    "endCustomerOrderNumber": shipping_address[0]['order_id'],
     "additionalAttributes": [
         {
         "attributeName": "allowPartialOrder",
