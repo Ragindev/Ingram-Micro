@@ -235,7 +235,7 @@ def createOrder(shipping_address, products_In_Order, linesOut):
     response = requests.request("POST", url, headers=headers, data=payload)
     print("****** CREATE A ORDER USING THE ABOVE DATA  ******* \n")
     print(response.text)
-    return "Order Created"
+    return "Order Created "
 
 
 
