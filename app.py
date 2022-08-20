@@ -10,6 +10,7 @@ import time
 import threading
 import asyncio
 import pprint
+import http.client
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -235,6 +236,62 @@ def createOrder(shipping_address, products_In_Order, linesOut):
     print("****** CREATE A ORDER USING THE ABOVE DATA  ******* \n")
     print(response.text)
     return "Order Created"
+
+
+# get order status from ingrammicro
+@app.route('/bcStatus',methods=["GET","POST"])
+def getOrderStatus():
+    print("Get Order Status")
+    # Create token for every new order 
+    client_id = 'vxGA45MVwXFEWYvjzITSGTdGAgeygbct'
+    client_secret = 'FyW7sATOWbGKFrOW'
+    url = "https://api.ingrammicro.com:443/oauth/oauth30/token"
+    payload=f'grant_type=client_credentials&client_id={client_id}&client_secret={client_secret}'
+    headers = {
+    'Content-Type': 'application/x-www-form-urlencoded'
+    }
+    tokenResponse = requests.request("POST", url, headers=headers, data=payload)
+    # print(json.loads(tokenResponse.text))
+    # convert the tokenResponse from string to Dictionary using (json.loads)
+    accessToken =json.loads(tokenResponse.text)
+    print(accessToken['access_token'])
+
+    url = "https://api.ingrammicro.com/sandbox/resellers/v6/orders/search?pageNumber=1&pageSize=100"
+
+    payload={}
+    headers = {
+    'Accept': 'application/json',
+    'IM-CorrelationID': '2022-07-20',
+    'IM-CountryCode': 'AU',
+    'IM-CustomerNumber': '280695',
+    'IM-SenderID': 'GHDGH',
+    'Authorization': 'Bearer '+accessToken['access_token']
+    }
+    response = requests.request("GET", url, headers=headers, data=payload)
+    pd_details=json.loads(response.text)
+
+    for cs in pd_details['orders']:
+        
+        if cs['orderStatus'] == "CANCELED":
+            print("customer num",cs['customerOrderNumber'],"status",cs['orderStatus'])
+            url = f"https://api.bigcommerce.com/stores/b5ajmj9rbq/v2/orders/{cs['customerOrderNumber']}"
+
+            payload = json.dumps({
+            "status_id": 5
+            })
+            headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            # 'X-Auth-Token': 'r4vkpwhvq8h595ak1m9vtg4l6pee9dy'
+            'X-Auth-Token': 'redptv84kmlgfed97l7jroa0mdknfgc  '
+            }
+
+            response = requests.request("PUT", url, headers=headers, data=payload)
+
+            print(response.text)
+
+    return "pd_details['orders']"
+    
 
 if __name__ == '__main__':
     app.run()
