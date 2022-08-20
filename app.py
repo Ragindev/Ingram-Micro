@@ -238,7 +238,9 @@ def createOrder(shipping_address, products_In_Order, linesOut):
     return "Order Created"
 
 
-# get order status from ingrammicro
+
+########################################################################################RJ
+# get order status from ingrammicro and update to BC
 @app.route('/bcStatus',methods=["GET","POST"])
 def getOrderStatus():
     print("Get Order Status")
@@ -265,6 +267,8 @@ def getOrderStatus():
     accessToken =json.loads(tokenResponse.text)
     print(accessToken['access_token'])
 
+    # GET ORDERS FROM INGRAM 
+
     url = "https://api.ingrammicro.com/sandbox/resellers/v6/orders/search?pageNumber=1&pageSize=100"
 
     payload={}
@@ -279,6 +283,7 @@ def getOrderStatus():
     response = requests.request("GET", url, headers=headers, data=payload)
     pd_details=json.loads(response.text)
 
+    #LOOPING THROUGH THE PRODUCTS AND UPDATINF THE STATUS 
     for cs in pd_details['orders']:
         print("customer num",cs['customerOrderNumber'],"status",cs['orderStatus'])
         if cs['orderStatus'] == "CANCELED":
@@ -345,22 +350,28 @@ def getOrderStatus():
             print("UNKONOW STATUS",cs['orderStatus'])
 
     return "pd_details['orders']"
-    
-# get order status from ingrammicro
+
+
+########################################################################################
+# GET PRODUCT INVENTORY AND AVAILABILITY DETAILS AND UPDATE IN BC
 @app.route('/productUpdation',methods=["GET","POST","PUT"])
 def bcProductUpdate():
     print("Get Order Status")
+
     # Create token for every new order 
     client_id = 'vxGA45MVwXFEWYvjzITSGTdGAgeygbct'
     client_secret = 'FyW7sATOWbGKFrOW'
-    store_hash="b5ajmj9rbq"
+    store_hash="o257sk57z9"
     # STORE HASH : b5ajmj9rbq
     # STORE HASH : o257sk57z9
+    pd_id1=1454 #TEMPLATE TEST
+    pd_id2=761 #Copy of 322GW
+
     bc_header = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            # 'X-Auth-Token': 'r4vkpwhvq8h595ak1m9vtg4l6pee9dy'
-            'X-Auth-Token': 'redptv84kmlgfed97l7jroa0mdknfgc'
+            'X-Auth-Token': 'r4vkpwhvq8h595ak1m9vtg4l6pee9dy'
+            # 'X-Auth-Token': 'redptv84kmlgfed97l7jroa0mdknfgc'
             }
     url = "https://api.ingrammicro.com:443/oauth/oauth30/token"
     payload=f'grant_type=client_credentials&client_id={client_id}&client_secret={client_secret}'
@@ -373,6 +384,7 @@ def bcProductUpdate():
     accessToken =json.loads(tokenResponse.text)
     print(accessToken['access_token'])
 
+    #GET PRODUCT DETAILS FROM INGRAM
     url = "https://api.ingrammicro.com:443/sandbox/resellers/v6/catalog/priceandavailability?includeAvailability=true&includePricing=true"
     payload = json.dumps({
     "products": [
@@ -394,8 +406,42 @@ def bcProductUpdate():
     'IM-CountryCode': 'AU'
     }
     response = requests.request("POST", url, headers=headers, data=payload)
-    print(response.text)
-    return response.text
+    product_detailsIg=json.loads(response.text)
+    print("pdc details",type(product_detailsIg))
+
+    #LOOPING THROUGH PRODUCTS AND UPDATE IN BC
+    for x in product_detailsIg:
+        print("ig part num",type(int(x['ingramPartNumber'])),x['ingramPartNumber'],"ig inventory",type(x['availability']['totalAvailability']),x['availability']['totalAvailability'],"price",x['pricing']['retailPrice'],type(x['pricing']['retailPrice']))
+        if int(x['ingramPartNumber']) == 3278984:
+            print("ig part num",type(int(x['ingramPartNumber'])),x['ingramPartNumber'],"ig inventory",x['availability']['totalAvailability'])
+            url = f"https://api.bigcommerce.com/stores/{store_hash}/v3/catalog/products/{pd_id1}"
+
+            payload = json.dumps({
+            "inventory_level": x['availability']['totalAvailability'],
+            "price": x['pricing']['retailPrice']
+            })
+            headers = bc_header
+
+            response = requests.request("PUT", url, headers=headers, data=payload)
+
+            print(response.text)
+        elif int(x['ingramPartNumber']) == 2985452:
+            print("ig part num",x['ingramPartNumber'],"ig inventory",x['availability']['totalAvailability'])
+            url = f"https://api.bigcommerce.com/stores/{store_hash}/v3/catalog/products/{pd_id2}"
+
+            payload = json.dumps({
+            "inventory_level": x['availability']['totalAvailability'],
+            "price": x['pricing']['retailPrice']
+            })
+            headers = bc_header
+
+            response = requests.request("PUT", url, headers=headers, data=payload)
+
+            print(response.text)
+        else:
+            print('not available')
+
+    return "product_detailsIg"    
 
 
 
