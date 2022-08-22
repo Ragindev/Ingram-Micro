@@ -16,6 +16,12 @@ pp = pprint.PrettyPrinter(indent=4)
 
 app = Flask(__name__)
 
+accept = 'application/json'
+IM_CustomerNumber = '280695'
+IM_CountryCode = 'AU'
+IM_SenderID = 'IngramMicro'
+IM_CorrelationID = '2022-07-29T05:31:04+0000'
+Content_Type = 'application/json'
 
 @app.route('/',methods=["GET", "POST"])
 def listern():
@@ -32,7 +38,7 @@ def tryYourSelf():
         'store_id':'1002102576', #store id NB
         # 'store_id':'1001802518', #Store ID Camera Stuff
         'data':{
-            'orderId':'697'
+            'orderId':'700'
             # 'orderId':'500'
         }
     }
@@ -42,8 +48,8 @@ def tryYourSelf():
 def processWebhookPayload(order_data):
     header = {
         "X-Auth-Token":"r4vkpwhvq8h595ak1m9vtg4l6pee9dy",
-        "Content-Type":"application/json",
-        "Accept": "application/json"
+        "Content-Type":accept,
+        "Accept":accept
         # STORE HASH : b5ajmj9rbq
         # STORE HASH : o257sk57z9
     }
@@ -87,7 +93,7 @@ def processWebhookPayload(order_data):
     for i in response:
         print("****** GET THE PRODUCTS DETAILS USING THE API  ******* \n")
         product_id = i["product_id"]
-        
+        product_Quantity = i['quantity']
         # Getting Each product data using product API
         url = f"https://api.bigcommerce.com/{store_hash}/v3/catalog/products/{product_id}"
         product_data = requests.request("GET",url,headers=header).json()
@@ -141,10 +147,11 @@ def processWebhookPayload(order_data):
         lines_data = {
             "customerLineNumber":customerLineNumber+1,
             "ingramPartNumber" : IM_SKU, #collecting the sku from the top
-            "quantity": response[0]['quantity'],
+            "quantity": product_Quantity,
             "unitPrice": product_data["data"]["price"], 
         }
         print("Lines Data in loop : ",lines_data)
+        print("QUANTITY ORDERED :",product_Quantity)
         linesOut.append(lines_data)
         print('\n')
         print('\n')
@@ -195,12 +202,12 @@ def createOrder(shipping_address, products_In_Order, linesOut):
     
     print("*********** token created **********")
     headers = {
-    'accept': 'application/json',
-    'IM-CustomerNumber': '280695',
-    'IM-CountryCode': 'AU',
-    'IM-SenderID': 'IngramMicro',
-    'IM-CorrelationID': '2022-07-29T05:31:04+0000',
-    'Content-Type': 'application/json',
+    'accept': accept,
+    'IM-CustomerNumber': IM_CustomerNumber,
+    'IM-CountryCode': IM_CountryCode,
+    'IM-SenderID': IM_SenderID,
+    'IM-CorrelationID': IM_CorrelationID,
+    'Content-Type': accept,
     'Authorization': 'Bearer '+ accessToken['access_token']  # Passing token to the header 
     }
     
@@ -251,8 +258,8 @@ def getOrderStatus():
     # STORE HASH : b5ajmj9rbq
     # STORE HASH : o257sk57z9
     bc_header = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
+            'Accept': accept,
+            'Content-Type': accept,
             # 'X-Auth-Token': 'r4vkpwhvq8h595ak1m9vtg4l6pee9dy'
             'X-Auth-Token': 'redptv84kmlgfed97l7jroa0mdknfgc'
             }
@@ -273,11 +280,11 @@ def getOrderStatus():
 
     payload={}
     headers = {
-    'Accept': 'application/json',
-    'IM-CorrelationID': '2022-07-20',
-    'IM-CountryCode': 'AU',
-    'IM-CustomerNumber': '280695',
-    'IM-SenderID': 'GHDGH',
+    'Accept': accept,
+    'IM-CorrelationID': IM_CorrelationID,
+    'IM-CountryCode': IM_CountryCode,
+    'IM-CustomerNumber': IM_CustomerNumber,
+    'IM-SenderID': IM_SenderID,
     'Authorization': 'Bearer '+accessToken['access_token']
     }
     response = requests.request("GET", url, headers=headers, data=payload)
@@ -368,8 +375,8 @@ def bcProductUpdate():
     pd_id2=761 #Copy of 322GW
 
     bc_header = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
+            'Accept': accept,
+            'Content-Type': accept,
             'X-Auth-Token': 'r4vkpwhvq8h595ak1m9vtg4l6pee9dy'
             # 'X-Auth-Token': 'redptv84kmlgfed97l7jroa0mdknfgc'
             }
@@ -397,13 +404,13 @@ def bcProductUpdate():
     ]
     })
     headers = {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    'Content-Type': accept,
+    'Accept': accept,
     'Authorization': 'Bearer '+accessToken['access_token'],
-    'IM-CustomerNumber': '280695',
-    'IM-CorrelationID': '2022-07-29T05:31:04+0000',
-    'IM-SenderID': 'SampleUser-Best-Buys',
-    'IM-CountryCode': 'AU'
+    'IM-CustomerNumber': IM_CustomerNumber,
+    'IM-CorrelationID': IM_CorrelationID,
+    'IM-SenderID': IM_SenderID,
+    'IM-CountryCode': IM_CountryCode
     }
     response = requests.request("POST", url, headers=headers, data=payload)
     product_detailsIg=json.loads(response.text)
@@ -424,7 +431,7 @@ def bcProductUpdate():
 
             response = requests.request("PUT", url, headers=headers, data=payload)
 
-            print(response.text)
+            # print(response.text)
         elif int(x['ingramPartNumber']) == 2985452:
             print("ig part num",x['ingramPartNumber'],"ig inventory",x['availability']['totalAvailability'])
             url = f"https://api.bigcommerce.com/stores/{store_hash}/v3/catalog/products/{pd_id2}"
@@ -437,7 +444,7 @@ def bcProductUpdate():
 
             response = requests.request("PUT", url, headers=headers, data=payload)
 
-            print(response.text)
+            # print(response.text)
         else:
             print('not available')
 
