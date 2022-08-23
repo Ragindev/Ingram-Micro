@@ -1,14 +1,7 @@
-from email import header
-import http
 import json
-from math import prod
-from pickle import GET
-from wsgiref import headers
 from flask import Flask, render_template,request
 import requests
-import time
 import threading
-import asyncio
 import pprint
 import http.client
 
@@ -38,7 +31,7 @@ def tryYourSelf():
         'store_id':'1002102576', #store id NB
         # 'store_id':'1001802518', #Store ID Camera Stuff
         'data':{
-            'orderId':'700'
+            'orderId':'708'
             # 'orderId':'500'
         }
     }
@@ -156,7 +149,7 @@ def processWebhookPayload(order_data):
         print('\n')
         print('\n')
         customerLineNumber = customerLineNumber + 1 
-    print(linesOut)
+    # print(linesOut)
     print('\n')
     print('\n')
 ########################################################################################
