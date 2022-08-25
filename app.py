@@ -150,8 +150,8 @@ def processWebhookPayload(order_data):
         print('\n')
         customerLineNumber = customerLineNumber + 1 
     # print(linesOut)
-    print('\n')
-    print('\n')
+    # print('\n')
+    # print('\n')
 ########################################################################################
         
     #  Collecting shiping Address data from order shipping_address API  
