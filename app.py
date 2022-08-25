@@ -50,19 +50,14 @@ def processWebhookPayload(order_data):
     print(order_data)
 ########################################################################################
 
-    print("********** GET ORDER DATA FROM WEBHOOK *********** \n")
+    # GET Order data from webhook
     store_hash = order_data['producer']
     scope = order_data['scope']
     store_id = order_data['store_id']
     order_id = order_data['data']['orderId']
 
-
-    print("store_hash                   :",store_hash)
-    print("scope                        :",scope)
-    print("store_id                     :",store_id)
-    print("order_id                     :",order_id )
-    
-    print('\n')    
+    print("ORDER ID IN WEBHOOK :",order_id )    
+      
 ########################################################################################
 # Chanaging the order status to Awaiting Shipment in Bigcommerce 
     url = f"https://api.bigcommerce.com/{store_hash}/v2/orders/{order_id}"
@@ -70,8 +65,7 @@ def processWebhookPayload(order_data):
         "status_id": 9, #Status id : 9 is Awaiting Shipment
     }
     update_order_status = requests.request("PUT", url, json=payload, headers=header).json()
-    print('\n')
-    print("Order Status Changed to  : ", update_order_status['status'])
+    print("STATUS Changed to   :", update_order_status['status'])
     
 ########################################################################################
     
@@ -81,10 +75,9 @@ def processWebhookPayload(order_data):
     customerLineNumber = 0
     url = f"https://api.bigcommerce.com/{store_hash}/v2/orders/{order_id}/products"
     response = requests.request("GET",url,headers=header).json()
-    print("Product DATA :", response)
+    # print("Product DATA :", response)
     # collecting multipl product from the product API using for Loop
     for i in response:
-        print("****** GET THE PRODUCTS DETAILS USING THE API  ******* \n")
         product_id = i["product_id"]
         product_Quantity = i['quantity']
         # Getting Each product data using product API
@@ -93,7 +86,7 @@ def processWebhookPayload(order_data):
         
         # Asign the SKU to the bcSKU Variable     
         bcSKU= product_data["data"]["sku"]
-        print("The Selected product BC SKU Is : ",bcSKU)
+        print("BigCommerce SKU     :",bcSKU)
         # Assign the selected BigCommerce SKUs to a variable 
         BC_prd = {"NBDVR622GW":"camera",
                   "NBDVR522GW":"camera",
@@ -129,10 +122,10 @@ def processWebhookPayload(order_data):
                 # if the product is a camera then it will assign a new sku values matching in IM
                 # else Assign the product to the second IM Sku
                 if BC_prd[SKU_key] == 'camera':
-                    print("The selected product is ::: CAMERA ")
+                    print("PRODUCT IS          : CAMERA ")
                     IM_SKU = 2985452
                 else:
-                    print("The selected product is ::: CAMERA ACCESSORIES ")
+                    print("PRODUCT IS          : ACCESSORY ")
                     IM_SKU = 3278984
                     
         products_In_Order.append(product_data)
@@ -143,36 +136,30 @@ def processWebhookPayload(order_data):
             "quantity": product_Quantity,
             "unitPrice": product_data["data"]["price"], 
         }
-        print("Lines Data in loop : ",lines_data)
-        print("QUANTITY ORDERED :",product_Quantity)
+        print("PRODUCT ID IN ORDER :",i["product_id"])
+        print("QUANTITY IN ORDERED :",product_Quantity)                
+        
         linesOut.append(lines_data)
-        print('\n')
-        print('\n')
         customerLineNumber = customerLineNumber + 1 
-    # print(linesOut)
-    print('\n')
-    print('\n')
+    
 ########################################################################################
         
     #  Collecting shiping Address data from order shipping_address API  
     url = f"https://api.bigcommerce.com/{store_hash}/v2/orders/{order_id}/shipping_addresses"
     shipping_address = requests.request("GET",url,headers=header).json()
     
-    print("****** GET THE SHIPPING DETAILS USING THE API  ******* \n")
     
-    print(shipping_address)
+    print("SHIPPING DETAILS  : ",shipping_address)
     
 ########################################################################################
     # Check the Country || if the selected country is Austalia then do the next step 
     # else simply print  Selected Country is not Australia
     selected_country = shipping_address[0]['country']
     if selected_country != 'Australia':
-        print("Selected Country is not Australia")
+        print("COUNTRY SELECTED is not Australia")
     else:
-        print("The Selected Country is : ",selected_country)
+        print("COUNTRY SELECTED    : ",selected_country)
         createOrder(shipping_address, products_In_Order, linesOut) # Calling the Create Order Function 
-        print('\n')
-        print('\n')
         return "got it" , 200
 
 
@@ -193,7 +180,7 @@ def createOrder(shipping_address, products_In_Order, linesOut):
     # convert the tokenResponse from string to Dictionary using (json.loads)
     accessToken =json.loads(tokenResponse.text)
     
-    print("*********** token created **********")
+    print("-- IM TOKEN CREATED SUCCESSFULLY --")
     headers = {
     'accept': accept,
     'IM-CustomerNumber': IM_CustomerNumber,
@@ -233,13 +220,13 @@ def createOrder(shipping_address, products_In_Order, linesOut):
     })  
     # print("Payload Is : ",payload)
     response = requests.request("POST", url, headers=headers, data=payload)
-    print("****** CREATE A ORDER USING THE ABOVE DATA  ******* \n")
+    print("-- IM ORDER DETAILS --")
     print(response.text)
-    return "Order Created "
+    return "Order Creation Successfull "
 
 
 
-########################################################################################RJ
+########################################################################################
 # get order status from ingrammicro and update to BC
 @app.route('/bcStatus',methods=["GET","POST"])
 def getOrderStatus():
